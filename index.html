@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Entregador</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="top-bar">
+        <h1>Painel de Entregas</h1>
+        <button id="locate-btn">📍 Minha Localização</button>
+    </header>
+
+    <!-- Novo painel para colar a comanda -->
+    <div class="comanda-panel">
+        <textarea id="comanda-text" placeholder="Cole o texto da comanda aqui...&#10;Ex:&#10;Endereço: Rua Rui Barbosa, 123&#10;Taxa: R$ 5,00"></textarea>
+        <button id="process-btn">Traçar Rota</button>
+        <div id="info-display" class="hidden">
+            <p><strong>Destino:</strong> <span id="dest-address">-</span></p>
+            <p><strong>Taxa de Entrega:</strong> <span id="dest-fee" class="highlight">-</span></p>
+        </div>
+    </div>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
