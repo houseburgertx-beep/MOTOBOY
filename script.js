@@ -1,4 +1,4 @@
-// Inicializa o mapa focado na região
+// Inicializa o mapa focado na região de Teixeira de Freitas
 const map = L.map('map').setView([-17.5353, -39.7427], 14);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -9,6 +9,9 @@ let routingControl = null;
 let currentLat = null;
 let currentLng = null;
 
+// Corrige tamanho do mapa ao carregar a tela
+setTimeout(() => { map.invalidateSize(); }, 500);
+
 // Captura a localização atual do motoboy
 document.getElementById('locate-btn').addEventListener('click', () => {
     if (navigator.geolocation) {
@@ -16,46 +19,49 @@ document.getElementById('locate-btn').addEventListener('click', () => {
             currentLat = position.coords.latitude;
             currentLng = position.coords.longitude;
             map.setView([currentLat, currentLng], 16);
-            L.marker([currentLat, currentLng]).addTo(map).bindPopup("Você está aqui").openPopup();
-        }, () => alert("Erro ao acessar GPS."));
+            L.marker([currentLat, currentLng]).addTo(map).bindPopup("Sua Base").openPopup();
+            alert("Localização atualizada com sucesso!");
+        }, () => alert("Erro ao acessar GPS. Permita o acesso no navegador."));
     }
 });
 
-// Botão para processar a comanda
+// Processamento da Comanda
 document.getElementById('process-btn').addEventListener('click', async () => {
     const texto = document.getElementById('comanda-text').value;
+    const btn = document.getElementById('process-btn');
+    
     if (!texto) {
-        alert("Cole a comanda primeiro!");
+        alert("Cole os dados do pedido primeiro!");
         return;
     }
 
-    // 1. EXTRAIR A TAXA (Procura por "Taxa", "Frete" ou "Entrega" seguido de R$)
+    // Extrair Taxa
     const regexTaxa = /(?:taxa|entrega|frete).*?(?:r\$|R\$)\s*(\d+[\.,]\d{2})/i;
     const matchTaxa = texto.match(regexTaxa);
-    const taxa = matchTaxa ? matchTaxa[1] : "Não identificada";
+    const taxa = matchTaxa ? matchTaxa[1] : "Calculada via app";
 
-    // 2. EXTRAIR O ENDEREÇO (Procura a linha que começa com "Endereço")
+    // Extrair Endereço
     const regexEndereco = /endere[çc]o:\s*(.*)/i;
     const matchEndereco = texto.match(regexEndereco);
     
     if (!matchEndereco) {
-        alert("Não foi possível encontrar o 'Endereço:' na comanda. Digite 'Endereço: [nome da rua]'");
+        alert("Não achei a palavra 'Endereço:' na comanda. Verifique o texto.");
         return;
     }
 
     const enderecoLimpo = matchEndereco[1].trim();
     
-    // Mostra as informações na tela
+    // Atualiza Painel Visual
     document.getElementById('dest-address').innerText = enderecoLimpo;
-    document.getElementById('dest-fee').innerText = taxa !== "Não identificada" ? `R$ ${taxa}` : taxa;
+    document.getElementById('dest-fee').innerText = taxa !== "Calculada via app" ? `R$ ${taxa}` : taxa;
     document.getElementById('info-display').classList.remove('hidden');
 
-    // 3. CONVERTER ENDEREÇO EM COORDENADAS (Geocoding)
-    // Adicionamos a cidade padrão para ajudar o buscador gratuito a não errar o país
+    // Busca coordenadas
     const enderecoBusca = `${enderecoLimpo}, Teixeira de Freitas, Bahia, Brasil`;
     
     try {
-        document.getElementById('process-btn').innerText = "Buscando rota...";
+        btn.innerText = "Calculando rota...";
+        btn.style.backgroundColor = "#94a3b8"; // cor de carregamento
         
         const resposta = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(enderecoBusca)}`);
         const dados = await resposta.json();
@@ -63,16 +69,15 @@ document.getElementById('process-btn').addEventListener('click', async () => {
         if (dados.length > 0) {
             const destLat = dados[0].lat;
             const destLng = dados[0].lon;
-
-            // Se o motoboy não clicou em localizar, usa um ponto central genérico de partida
             const startLat = currentLat || -17.5353;
             const startLng = currentLng || -39.7427;
 
-            // 4. DESENHAR A ROTA
+            // Remove rota anterior
             if (routingControl) {
                 map.removeControl(routingControl);
             }
 
+            // Traça nova rota
             routingControl = L.Routing.control({
                 waypoints: [
                     L.latLng(startLat, startLng),
@@ -80,15 +85,17 @@ document.getElementById('process-btn').addEventListener('click', async () => {
                 ],
                 routeWhileDragging: false,
                 language: 'pt',
-                lineOptions: { styles: [{color: '#27ae60', opacity: 0.9, weight: 6}] }
+                lineOptions: { styles: [{color: '#0284c7', opacity: 0.9, weight: 5}] },
+                show: false // Esconde o painel de texto longo de direções para manter o visual limpo
             }).addTo(map);
 
         } else {
-            alert("Rua não encontrada no mapa. Tente simplificar o nome da rua (Ex: remova números ou bairro).");
+            alert("Endereço não encontrado no mapa. Tente simplificar.");
         }
     } catch (error) {
-        alert("Erro de conexão ao buscar o endereço.");
+        alert("Erro ao conectar com o serviço de mapas.");
     } finally {
-        document.getElementById('process-btn').innerText = "Traçar Rota";
+        btn.innerText = "Calcular Melhor Rota";
+        btn.style.backgroundColor = "#0284c7"; // volta cor normal
     }
 });
