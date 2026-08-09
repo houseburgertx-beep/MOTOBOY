@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel do Entregador</title>
+    <title>Sistema de Entregas - Logística</title>
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
@@ -11,22 +11,61 @@
 </head>
 <body>
 
-    <header class="top-bar">
-        <h1>Painel de Entregas</h1>
-        <button id="locate-btn">📍 Minha Localização</button>
-    </header>
-
-    <!-- Novo painel para colar a comanda -->
-    <div class="comanda-panel">
-        <textarea id="comanda-text" placeholder="Cole o texto da comanda aqui...&#10;Ex:&#10;Endereço: Rua Rui Barbosa, 123&#10;Taxa: R$ 5,00"></textarea>
-        <button id="process-btn">Traçar Rota</button>
-        <div id="info-display" class="hidden">
-            <p><strong>Destino:</strong> <span id="dest-address">-</span></p>
-            <p><strong>Taxa de Entrega:</strong> <span id="dest-fee" class="highlight">-</span></p>
+    <!-- Menu Lateral (Sidebar) -->
+    <aside class="sidebar">
+        <div class="logo">
+            <h2>📦 RotaPRO</h2>
         </div>
-    </div>
+        <nav class="menu">
+            <a href="#" class="active">📍 Mapa de Rotas</a>
+            <a href="#">📝 Histórico</a>
+            <a href="#">⚙️ Configurações</a>
+        </nav>
+        <button id="locate-btn" class="btn-secondary">📡 Meu GPS</button>
+    </aside>
 
-    <div id="map"></div>
+    <!-- Área Principal -->
+    <main class="main-content">
+        <header class="topbar">
+            <h1>Monitoramento de Entregas</h1>
+            <span class="status-badge">🟢 Sistema Online</span>
+        </header>
+
+        <div class="dashboard-grid">
+            
+            <!-- Coluna de Controle -->
+            <div class="control-panel">
+                <div class="card">
+                    <h3>Nova Entrega</h3>
+                    <p class="subtitle">Cole os dados do pedido abaixo:</p>
+                    <textarea id="comanda-text" placeholder="Cole a comanda aqui...&#10;Ex: Tios Rockets&#10;Endereço: Av. Getúlio Vargas, Centro&#10;Taxa: R$ 7,00"></textarea>
+                    <button id="process-btn" class="btn-primary">Calcular Melhor Rota</button>
+                </div>
+
+                <div id="info-display" class="card hidden">
+                    <h3>Resumo da Viagem</h3>
+                    <div class="info-row">
+                        <span>Destino:</span>
+                        <strong id="dest-address">-</strong>
+                    </div>
+                    <div class="info-row">
+                        <span>Taxa de Entrega:</span>
+                        <strong id="dest-fee" class="highlight">-</strong>
+                    </div>
+                    <div class="info-row">
+                        <span>Status:</span>
+                        <span class="badge-warning">Aguardando Partida</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coluna do Mapa -->
+            <div class="map-panel card">
+                <div id="map"></div>
+            </div>
+
+        </div>
+    </main>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
